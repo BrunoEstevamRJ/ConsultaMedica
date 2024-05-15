@@ -1,17 +1,15 @@
 // laudoControlador.js
 const bancoDeDados = require('../bancodedados');
 
-// Obter o laudo de uma consulta médica
-function obterLaudoConsulta(req, res) {
-    const { identificador_consulta, senha } = req.query;
-
+// Função para obter o laudo de uma consulta médica
+function obterLaudoConsulta(identificadorConsulta, senha, res) {
     // Verificar se o identificador da consulta e a senha foram informados
-    if (!identificador_consulta || !senha) {
+    if (!identificadorConsulta || !senha) {
         return res.status(400).json({ mensagem: "Identificador da consulta e senha são obrigatórios!" });
     }
 
     // Verificar se a consulta médica informada existe
-    const consulta = bancoDeDados.consultas.find(consulta => consulta.identificador === parseInt(identificador_consulta));
+    const consulta = bancoDeDados.consultas.find(consulta => consulta.identificador === parseInt(identificadorConsulta));
     if (!consulta) {
         return res.status(404).json({ mensagem: "Consulta médica não encontrada!" });
     }
@@ -22,7 +20,7 @@ function obterLaudoConsulta(req, res) {
     }
 
     // Verificar se existe um laudo para a consulta informada
-    const laudo = bancoDeDados.laudos.find(laudo => laudo.identificadorConsulta === parseInt(identificador_consulta));
+    const laudo = bancoDeDados.laudos.find(laudo => laudo.identificadorConsulta === parseInt(identificadorConsulta));
     if (!laudo) {
         return res.status(404).json({ mensagem: "Laudo não encontrado para a consulta informada!" });
     }
