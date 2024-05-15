@@ -1,24 +1,35 @@
-// medicosControlador.js
+// medicoControlador.js
+
+// Importe o banco de dados em memória
 const bancoDeDados = require('../bancodedados');
 
-// Consultas do Médico
-function consultasDoMedico(req, res) {
-    const { identificador_medico } = req.query;
+// Função para listar as consultas que um médico atendeu
+function listarConsultasMedico(req, res, query) {
+    const { identificador_medico } = query;
 
-    // Verificar se o identificador do médico foi informado
+    // Verifica se o identificador do médico foi fornecido
     if (!identificador_medico) {
-        return res.status(400).json({ mensagem: "Identificador do médico não informado!" });
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ mensagem: 'O identificador do médico é obrigatório' }));
+        return;
     }
 
-    // Verificar se o médico existe
+    // Encontra o médico pelo identificador na base de dados
     const medico = bancoDeDados.consultorio.medicos.find(medico => medico.identificador === parseInt(identificador_medico));
+
+    // Se o médico não for encontrado, retorna uma mensagem de erro
     if (!medico) {
-        return res.status(404).json({ mensagem: "O médico informado não existe na base!" });
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ mensagem: 'O médico informado não existe na base' }));
+        return;
     }
 
-    // Retornar todas as consultas vinculadas ao médico
+    // Filtra as consultas pelo identificador do médico
     const consultasMedico = bancoDeDados.consultas.filter(consulta => consulta.identificadorMedico === parseInt(identificador_medico));
-    res.status(200).json(consultasMedico);
+
+    // Retorna a lista de consultas do médico
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(consultasMedico));
 }
 
-module.exports = { atualizarConsulta };
+module.exports = { listarConsultasMedico };

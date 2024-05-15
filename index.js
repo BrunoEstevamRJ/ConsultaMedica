@@ -1,12 +1,22 @@
 // index.js
 const http = require('http');
-const { manipularRequisicao } = require('./rotas');
+const url = require('url');
+const rotas = require('./rotas');
 
-// Criar servidor HTTP
-const servidor = http.createServer(manipularRequisicao);
+const servidor = http.createServer((req, res) => {
+    const { pathname, query } = url.parse(req.url, true);
 
-// Definir a porta em que o servidor irá escutar
-const porta = process.env.PORT || 3000;
-servidor.listen(porta, () => {
-  console.log(`Servidor iniciado na porta ${porta}`);
+    const rota = rotas[pathname];
+    if (rota && rota[req.method]) {
+        rota[req.method](req, res, query);
+    } else {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ mensagem: 'Rota não encontrada' }));
+    }
+});
+
+const PORTA = process.env.PORTA || 3000;
+
+servidor.listen(PORTA, () => {
+    console.log(`Servidor rodando na porta ${PORTA}`);
 });
