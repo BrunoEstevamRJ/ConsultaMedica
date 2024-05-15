@@ -1,15 +1,12 @@
 // index.js
-const express = require('express');
-const rotas = require('./rotas');
+const http = require('http');
+const { manipularRequisicao } = require('./rotas');
 
-const app = express();
+// Criar servidor HTTP
+const servidor = http.createServer(manipularRequisicao);
 
-// Middlewares
-app.use(express.json());
-app.use('/api', rotas);
-
-// Iniciar o servidor
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+// Definir a porta em que o servidor irá escutar
+const porta = process.env.PORT || 3000;
+servidor.listen(porta, () => {
+  console.log(`Servidor iniciado na porta ${porta}`);
 });

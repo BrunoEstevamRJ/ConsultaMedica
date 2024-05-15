@@ -1,16 +1,35 @@
 // rotas.js
-const express = require('express');
-const router = express.Router();
-const consultasControlador = require('./controladores/consultasControlador');
-const medicosControlador = require('./controladores/medicosControlador');
+const { URL } = require('url');
+const { consultarConsultas, criarConsulta, atualizarConsulta, cancelarConsulta, finalizarConsulta, obterLaudoConsulta, consultarConsultasMedico } = require('./controladores/consultasControlador');
 
-// Defina as rotas aqui
-router.get('/consultas', consultasControlador.listarConsultas);
-router.post('/consulta', consultasControlador.criarConsulta);
-router.put('/consulta/:identificadorConsulta/paciente', consultasControlador.atualizarConsulta);
-router.delete('/consulta/:identificadorConsulta', consultasControlador.cancelarConsulta);
-router.post('/consulta/finalizar', consultasControlador.finalizarConsulta);
-router.get('/consulta/laudo', consultasControlador.obterLaudoConsulta);
-router.get('/consultas/medico', medicosControlador.consultasDoMedico);
+// Função para manipular as requisições recebidas pelo servidor
+function manipularRequisicao(req, res) {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const metodo = req.method;
+  
+  // Roteamento de requisições
+  if (metodo === 'GET' && url.pathname === '/consultas') {
+    consultarConsultas(req, res);
+  } else if (metodo === 'POST' && url.pathname === '/consulta') {
+    criarConsulta(req, res);
+  } else if (metodo === 'PUT' && url.pathname.startsWith('/consulta/')) {
+    const partesCaminho = url.pathname.split('/');
+    const identificadorConsulta = partesCaminho[2];
+    atualizarConsulta(req, res, identificadorConsulta);
+  } else if (metodo === 'DELETE' && url.pathname.startsWith('/consulta/')) {
+    const partesCaminho = url.pathname.split('/');
+    const identificadorConsulta = partesCaminho[2];
+    cancelarConsulta(req, res, identificadorConsulta);
+  } else if (metodo === 'POST' && url.pathname === '/consulta/finalizar') {
+    finalizarConsulta(req, res);
+  } else if (metodo === 'GET' && url.pathname === '/consulta/laudo') {
+    obterLaudoConsulta(req, res);
+  } else if (metodo === 'GET' && url.pathname === '/consultas/medico') {
+    consultarConsultasMedico(req, res);
+  } else {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ mensagem: 'Rota não encontrada' }));
+  }
+}
 
-module.exports = router;
+module.exports = { manipularRequisicao };
